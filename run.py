@@ -37,7 +37,7 @@ def check_affine(affine):
 
 try:
     print('checking bold')
-    img = nibabel.load(path)
+    img = nibabel.load(config["bold"])
     results['headers'] = str(img.header)
     results['base_affine'] = str(img.header.get_base_affine())
 
