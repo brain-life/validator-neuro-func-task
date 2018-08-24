@@ -1,5 +1,6 @@
 {
     "bold": "/mnt/scratch/testdata/A00008326/functask/bold.nii.gz",
-    "events": "/mnt/scratch/testdata/A00008326/functask/events.tsv"
+    "events": "/mnt/scratch/testdata/A00008326/functask/events.tsv",
+    "sbref": "/mnt/scratch/testdata/A00008326/functask/bold.nii.gz"
 }
 

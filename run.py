@@ -55,6 +55,7 @@ except Exception as e:
 # TODO - if it's not .gz'ed, I should?
 os.symlink(config['bold'], "bold.nii.gz")
 
+#TODO - validate optional stuff
 if config.has_key('events'):
     try:
         with open(config['events']) as tsv:
@@ -66,6 +67,28 @@ if config.has_key('events'):
         os.symlink(config['events'], "events.tsv")
     except Exception as e:
         results['errors'].append("failed to validate events ..  error code: " + str(e))
+
+if config.has_key('sbref'):
+    try:
+        #TODO - validate sbref?
+                
+        os.symlink(config['sbref'], "sbref.nii.gz")
+    except Exception as e:
+        results['errors'].append("failed to validate sbref ..  error code: " + str(e))
+
+if config.has_key('physio'):
+    try:
+        #TODO - validate 
+        os.symlink(config['physio'], "physio.tsv.gz")
+    except Exception as e:
+        results['errors'].append("failed to validate physio.tsv ..  error code: " + str(e))
+
+if config.has_key('physio_json'):
+    try:
+        #TODO - validate 
+        os.symlink(config['physio_json'], "physio.json")
+    except Exception as e:
+        results['errors'].append("failed to validate physio.json ..  error code: " + str(e))
 
 print("all good")
 
