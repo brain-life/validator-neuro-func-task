@@ -51,9 +51,14 @@ try:
 except Exception as e:
     results['errors'].append("failed to validate bold ..  error code: " + str(e))
 
+if not os.path.exists("output"):
+    os.mkdir("output")
+
 # TODO - normalize (for now, let's just symlink)
 # TODO - if it's not .gz'ed, I should?
-os.symlink(config['bold'], "bold.nii.gz")
+if os.path.lexists("output/bold.nii.gz"):
+    os.remove("output/bold.nii.gz")
+os.symlink("../"+config['bold'], "output/bold.nii.gz")
 
 #TODO - validate optional stuff
 if config.has_key('events'):
@@ -64,29 +69,36 @@ if config.has_key('events'):
                 #TODO - what should do with row now?
                 print(row)
                 
-        os.symlink(config['events'], "events.tsv")
+        if os.path.lexists("output/events.tsv"):
+            os.remove("output/events.tsv")
+        os.symlink("../"+config['events'], "output/events.tsv")
     except Exception as e:
         results['errors'].append("failed to validate events ..  error code: " + str(e))
 
 if config.has_key('sbref'):
     try:
         #TODO - validate sbref?
-                
-        os.symlink(config['sbref'], "sbref.nii.gz")
+        if os.path.lexists("output/sbref.nii.gz"):
+            os.remove("output/sbref.nii.gz")
+        os.symlink("../"+config['sbref'], "output/sbref.nii.gz")
     except Exception as e:
         results['errors'].append("failed to validate sbref ..  error code: " + str(e))
 
 if config.has_key('physio'):
     try:
         #TODO - validate 
-        os.symlink(config['physio'], "physio.tsv.gz")
+        if os.path.lexists("output/physio.tsv.gz"):
+            os.remove("output/physio.tsv.gz")
+        os.symlink("../"+config['physio'], "physio.tsv.gz")
     except Exception as e:
         results['errors'].append("failed to validate physio.tsv ..  error code: " + str(e))
 
 if config.has_key('physio_json'):
     try:
         #TODO - validate 
-        os.symlink(config['physio_json'], "physio.json")
+        if os.path.lexists("output/physio.json"):
+            os.remove("output/physio.json")
+        os.symlink("../"+config['physio_json'], "physio.json")
     except Exception as e:
         results['errors'].append("failed to validate physio.json ..  error code: " + str(e))
 
