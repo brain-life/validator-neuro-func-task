@@ -1,3 +1,5 @@
 products.json
+product.json
 config.json
-
+*.nii.gz
+output

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import json
@@ -6,6 +6,8 @@ import re
 import subprocess
 import nibabel
 import csv
+
+import numpy as np
 
 # Things that this script checks
 # 
@@ -38,8 +40,14 @@ def check_affine(affine):
 try:
     print('checking bold')
     img = nibabel.load(config["bold"])
-    results['headers'] = str(img.header)
-    results['base_affine'] = str(img.header.get_base_affine())
+    #results['meta'] = img.header
+
+    results['meta'] = {}
+    for key in img.header:
+        value = img.header[key]
+        results['meta'][key] = value
+
+    results['meta']['base_affine'] = img.header.get_base_affine()
 
     # check dimensions
     dims = img.header['dim'][0]
@@ -61,13 +69,13 @@ if os.path.lexists("output/bold.nii.gz"):
 os.symlink("../"+config['bold'], "output/bold.nii.gz")
 
 #TODO - validate optional stuff
-if config.has_key('events'):
+if 'events' in config:
     try:
         with open(config['events']) as tsv:
             tsv_reader = csv.reader(tsv, delimiter='\t')
             for row in tsv_reader:
                 #TODO - what should do with row now?
-                print(row)
+                print("TODO - events row:", row)
                 
         if os.path.lexists("output/events.tsv"):
             os.remove("output/events.tsv")
@@ -75,7 +83,7 @@ if config.has_key('events'):
     except Exception as e:
         results['errors'].append("failed to validate events ..  error code: " + str(e))
 
-if config.has_key('sbref'):
+if 'sbref' in config:
     try:
         #TODO - validate sbref?
         if os.path.lexists("output/sbref.nii.gz"):
@@ -84,7 +92,7 @@ if config.has_key('sbref'):
     except Exception as e:
         results['errors'].append("failed to validate sbref ..  error code: " + str(e))
 
-if config.has_key('physio'):
+if 'physio' in config:
     try:
         #TODO - validate 
         if os.path.lexists("output/physio.tsv.gz"):
@@ -93,7 +101,7 @@ if config.has_key('physio'):
     except Exception as e:
         results['errors'].append("failed to validate physio.tsv ..  error code: " + str(e))
 
-if config.has_key('physio_json'):
+if 'physio_json' in config:
     try:
         #TODO - validate 
         if os.path.lexists("output/physio.json"):
@@ -104,5 +112,22 @@ if config.has_key('physio_json'):
 
 print("all good")
 
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (np.int_, np.intc, np.intp, np.int8,
+            np.int16, np.int32, np.int64, np.uint8,
+            np.uint16, np.uint32, np.uint64)):
+            return int(obj)
+        elif isinstance(obj, (np.float_, np.float16, np.float32,
+            np.float64)):
+            return float(obj)
+        elif isinstance(obj, (np.ndarray,)): 
+            return obj.tolist()
+        elif isinstance(obj, (bytes,)):
+            return obj.decode("utf-8")
+        return json.JSONEncoder.default(self, obj)
+
 with open("product.json", "w") as fp:
-    json.dump(results, fp)
+    json.dump(results, fp, cls=NumpyEncoder)
+
+print("done")
