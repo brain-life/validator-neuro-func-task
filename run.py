@@ -6,6 +6,7 @@ import re
 import subprocess
 import nibabel
 import csv
+import math
 
 import numpy as np
 
@@ -117,15 +118,22 @@ class NumpyEncoder(json.JSONEncoder):
         if isinstance(obj, (np.int_, np.intc, np.intp, np.int8,
             np.int16, np.int32, np.int64, np.uint8,
             np.uint16, np.uint32, np.uint64)):
-            return int(obj)
-        elif isinstance(obj, (np.float_, np.float16, np.float32,
-            np.float64)):
-            return float(obj)
+            ret = int(obj)
+        elif isinstance(obj, (np.float_, np.float16, np.float32, np.float64)):
+            ret = float(obj)
         elif isinstance(obj, (np.ndarray,)): 
-            return obj.tolist()
-        elif isinstance(obj, (bytes,)):
-            return obj.decode("utf-8")
-        return json.JSONEncoder.default(self, obj)
+            ret = obj.tolist()
+        else:
+            ret = json.JSONEncoder.default(self, obj)
+
+        if isinstance(ret, (float)):
+            if math.isnan(ret):
+                ret = None
+
+        if isinstance(ret, (bytes, bytearray)):
+            ret = ret.decode("utf-8")
+
+        return ret
 
 with open("product.json", "w") as fp:
     json.dump(results, fp, cls=NumpyEncoder)
