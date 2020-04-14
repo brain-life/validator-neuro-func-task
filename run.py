@@ -70,7 +70,7 @@ if os.path.lexists("output/bold.nii.gz"):
 os.symlink("../"+config['bold'], "output/bold.nii.gz")
 
 #TODO - validate optional stuff
-if 'events' in config:
+if 'events' in config and os.path.exists(config["events"]):
     try:
         with open(config['events']) as tsv:
             tsv_reader = csv.reader(tsv, delimiter='\t')
@@ -84,7 +84,7 @@ if 'events' in config:
     except Exception as e:
         results['errors'].append("failed to validate events ..  error code: " + str(e))
 
-if 'sbref' in config:
+if 'sbref' in config and os.path.exists(config["sbref"]):
     try:
         #TODO - validate sbref?
         if os.path.lexists("output/sbref.nii.gz"):
@@ -93,7 +93,7 @@ if 'sbref' in config:
     except Exception as e:
         results['errors'].append("failed to validate sbref ..  error code: " + str(e))
 
-if 'physio' in config:
+if 'physio' in config and os.path.exists(config["physio"]):
     try:
         #TODO - validate 
         if os.path.lexists("output/physio.tsv.gz"):
@@ -102,7 +102,7 @@ if 'physio' in config:
     except Exception as e:
         results['errors'].append("failed to validate physio.tsv ..  error code: " + str(e))
 
-if 'physio_json' in config:
+if 'physio_json' in config and os.path.exists(config["physio_json"]):
     try:
         #TODO - validate 
         if os.path.lexists("output/physio.json"):
