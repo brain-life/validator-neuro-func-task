@@ -20,7 +20,7 @@ import numpy as np
 # import socket
 # print(socket.gethostname())
 
-with open('config.json') as config_json:
+with open('config.json', encoding='utf-8') as config_json:
     config = json.load(config_json)
 
 results = {"errors": [], "warnings": []}
