@@ -7,7 +7,7 @@ import subprocess
 import nibabel
 import csv
 import math
-
+import binascii
 import numpy as np
 
 # Things that this script checks
@@ -38,27 +38,35 @@ def check_affine(affine):
     if affine[2][1] != 0: results['warnings'].append("transform matrix 2.1 is not 0")
     if affine[2][2] != 1: results['warnings'].append("transform  matrix 2.2 is not 1")
 
-try:
-    print('checking bold')
-    img = nibabel.load(config["bold"])
-    #results['meta'] = img.header
+def validate_func(path):
+    with open(path, 'rb') as test_f:
+        if binascii.hexlify(test_f.read(2)) != b'1f8b':
+            results['errors'].append("file doesn't look like a gzip-ed nifti");
+            return
 
-    results['meta'] = {}
-    for key in img.header:
-        value = img.header[key]
-        results['meta'][key] = value
+    try:
+        print('checking bold')
+        img = nibabel.load(path)
+        #results['meta'] = img.header
 
-    results['meta']['base_affine'] = img.header.get_base_affine()
+        results['meta'] = {}
+        for key in img.header:
+            value = img.header[key]
+            results['meta'][key] = value
 
-    # check dimensions
-    dims = img.header['dim'][0]
-    if dims != 4:
-        results['errors'].append("bold should be 4D but has " + str(dims))
+        results['meta']['base_affine'] = img.header.get_base_affine()
 
-    check_affine(img.header.get_base_affine())
+        # check dimensions
+        dims = img.header['dim'][0]
+        if dims != 4:
+            results['errors'].append("bold should be 4D but has " + str(dims))
 
-except Exception as e:
-    results['errors'].append("failed to validate bold ..  error code: " + str(e))
+        check_affine(img.header.get_base_affine())
+
+    except Exception as e:
+        results['errors'].append("failed to validate bold ..  error code: " + str(e))
+
+validate_func(config['bold'])
 
 if not os.path.exists("output"):
     os.mkdir("output")
@@ -111,7 +119,10 @@ if 'physio_json' in config and os.path.exists(config["physio_json"]):
     except Exception as e:
         results['errors'].append("failed to validate physio.json ..  error code: " + str(e))
 
-print("all good")
+if len(results['errors']) == 0:
+    print("all good")
+else:
+    print(results['errors'])
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
