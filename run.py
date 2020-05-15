@@ -53,7 +53,7 @@ def validate_func(path):
         #results['meta']['nifti_headers'] = img.header #Object of type 'Nifti1Header' is not JSON serializable
         for key in img.header:
             value = img.header[key]
-            results['meta'][key] = value
+            results['meta']['nifti_headers'][key] = value
 
         results['meta']['nifti_headers']['base_affine'] = img.header.get_base_affine()
 
