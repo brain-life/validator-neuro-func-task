@@ -49,12 +49,13 @@ def validate_func(path):
         img = nibabel.load(path)
         #results['meta'] = img.header
 
-        results['meta'] = {}
+        results['meta'] = {'nifti_headers': {}}
+        #results['meta']['nifti_headers'] = img.header #Object of type 'Nifti1Header' is not JSON serializable
         for key in img.header:
             value = img.header[key]
             results['meta'][key] = value
 
-        results['meta']['base_affine'] = img.header.get_base_affine()
+        results['meta']['nifti_headers']['base_affine'] = img.header.get_base_affine()
 
         # check dimensions
         dims = img.header['dim'][0]
