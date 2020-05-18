@@ -98,13 +98,13 @@ def validate_func(path):
     except Exception as e:
         results['errors'].append("failed to validate bold ..  error code: " + str(e))
 
+if not os.path.exists("secondary"):
+    os.mkdir("secondary")
+
 validate_func(config['bold'])
 
 if not os.path.exists("output"):
     os.mkdir("output")
-
-if not os.path.exists("secondary"):
-    os.mkdir("secondary")
 
 # TODO - normalize (for now, let's just symlink)
 # TODO - if it's not .gz'ed, I should?
