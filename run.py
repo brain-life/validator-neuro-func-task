@@ -9,6 +9,7 @@ import csv
 import math
 import binascii
 import numpy as np
+from PIL import Image, ImageDraw
 
 # Things that this script checks
 # 
@@ -38,6 +39,12 @@ def check_affine(affine):
     if affine[2][1] != 0: results['warnings'].append("transform matrix 2.1 is not 0")
     if affine[2][2] != 1: results['warnings'].append("transform  matrix 2.2 is not 1")
 
+def fix_level(image):
+    image = image - np.min(image)
+    image_max = np.max(image)
+    return (image / image_max)*500
+
+
 def validate_func(path):
     with open(path, 'rb') as test_f:
         if binascii.hexlify(test_f.read(2)) != b'1f8b':
@@ -64,6 +71,30 @@ def validate_func(path):
 
         check_affine(img.header.get_base_affine())
 
+        #################################################################
+        # save some mid slices
+        #
+
+        print("creating mid slice images")
+        #img_data = img.get_fdata()
+        slice_x_pos = int(img.header['dim'][1]/2)
+        slice_y_pos = int(img.header['dim'][2]/2)
+        slice_z_pos = int(img.header['dim'][3]/2)
+        slice_x = img.dataobj[slice_x_pos, :, :, 0]
+        slice_y = img.dataobj[:, slice_y_pos, :, 0]
+        slice_z = img.dataobj[:, :, slice_z_pos, 0]
+
+        slice_x = fix_level(slice_x).T
+        slice_y = fix_level(slice_y).T
+        slice_z = fix_level(slice_z).T
+
+        image_x = Image.fromarray(np.flipud(slice_x)).convert('L')
+        image_x.save('secondary/x.png')
+        image_y = Image.fromarray(np.flipud(slice_y)).convert('L')
+        image_y.save('secondary/y.png')
+        image_z = Image.fromarray(np.flipud(slice_z)).convert('L')
+        image_z.save('secondary/z.png')
+
     except Exception as e:
         results['errors'].append("failed to validate bold ..  error code: " + str(e))
 
@@ -71,6 +102,9 @@ validate_func(config['bold'])
 
 if not os.path.exists("output"):
     os.mkdir("output")
+
+if not os.path.exists("secondary"):
+    os.mkdir("secondary")
 
 # TODO - normalize (for now, let's just symlink)
 # TODO - if it's not .gz'ed, I should?
