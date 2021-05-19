@@ -24,7 +24,17 @@ from PIL import Image, ImageDraw
 with open('config.json', encoding='utf-8') as config_json:
     config = json.load(config_json)
 
-results = {"errors": [], "warnings": []}
+results = {"errors": [], "warnings": [], "meta": {}}
+
+#copy _input
+if "_inputs" in config:
+    iconfig = config["_inputs"][0]
+    if "meta" in iconfig:
+        results["meta"] = iconfig["meta"]
+    if "tags" in iconfig:
+        results["tags"] = iconfig["tags"]
+    if "datatype_tags" in iconfig:
+        results["datatype_tags"] = iconfig["datatype_tags"]
 
 directions = None
 
@@ -54,10 +64,7 @@ def validate_func(path):
     try:
         print('checking bold')
         img = nibabel.load(path)
-        #results['meta'] = img.header
-
-        results['meta'] = {'nifti_headers': {}}
-        #results['meta']['nifti_headers'] = img.header #Object of type 'Nifti1Header' is not JSON serializable
+        results['meta']["nifti_headers"] = {}
         for key in img.header:
             value = img.header[key]
             results['meta']['nifti_headers'][key] = value
